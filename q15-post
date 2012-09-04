@@ -1,0 +1,18 @@
+So this is just a combination. Python has factorial in the standard library, but not permutation or combination. This simple code uses an accumulating product loop for P(40,20) to avoid wasted operations, then divides by the remaining 20!
+[code=]
+
+# must make 20 down and 20 right moves, in any order
+# equivalent to picking 20 numbers from 1...40 to be the down moves
+# ie C(40,20) = 40!/(20!*20!) = 40*39*...*21 / 20!
+from math import factorial
+
+nPr = 1
+for i in xrange(21,41):       # after loop: nPr = P(40,20)
+    nPr *= i
+print nPr/factorial(20)    # C(40,20)
+[/code]
+Of course, with these numbers, a human can't detect the difference in running time if you just use
+[code=]
+from math import factorial
+print factorial(40)/(factorial(20)*factorial(20))
+[/code]

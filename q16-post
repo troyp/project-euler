@@ -1,0 +1,11 @@
+Python solution.
+[code=]
+def sumdigits(n):
+    digits = []
+    while n>0:
+        n,r = divmod(n,10)
+        digits.append(r)
+    return sum(digits)
+
+print sumdigits(1<<1000)
+[/code]

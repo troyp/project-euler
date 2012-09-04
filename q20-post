@@ -1,0 +1,64 @@
+Solution in Python. You can just do this naively for 100!, but I tried to make it a bit more efficient. The factorial implementation is simple but pretty efficient using a prime factorization. You can see that 100! contains 50 even factors, and 33 factors which are divisible by 3. Continuing this line of reasoning, it has 25 factors divisible by 4 (but they are already counted in the even factors, so we only need to account for the extra *2 factor). Continuing, we see that each prime <= 100 will occur as many times as it divides 100, then again as many times as the prime squared divides 100 and so on. The factorial is then calculated by multiplying the exponentiated primes. The exponentiations should be optimized to use repeated squaring, so this should improve performance. Also, for this application, the factors of ten (paired 2s and 5s) could be removed before calculating the factorial, since we don't need the zeros at the end. The remaining 2s are left to the end and done as a right-shift. I'm sure this multiplication can be further optimized, but this is good enough for now.
+
+The digit sum just uses a straightforward function I wrote for an earlier question. It can handle 50000!, but 100000! was taking a long time (although the factorial code could calculate it quickly enough).
+
+I think the digit summation could be sped up dramatically by interweaving it with the multiplication. If the multiplication were organized in such a way as to combine factors into the product of a smaller group of larger numbers (which would increase multiplication efficiency anyway), we could calculate the least significant digits first, then ignore them (apart from a carry) as we moved on to more significant digits.
+
+[code=]
+# prime sieve
+N = 100
+
+from bitarray import bitarray
+isprime = bitarray(N+1)
+isprime.setall(True)
+isprime[:2] = False
+isprime[4::2] = False  # "cross off" multiples of 2
+isprime[6::3] = False  # "cross off" multiples of 3
+isprime[10::5] = False  # "cross off" multiples of 5
+
+# deal with 6 integers at a time, starting with 7-13
+# n+1, n+3, n+5 are even; n+2, n+5 are divisible by 3
+# we only need to test n, n+4
+# if we find a prime, cross off its multiples
+# (we only need to start with its square, lower multiples
+#  have already been crossed off from their lower factor)
+n = 7
+while n < N - 6:
+    if isprime[n]:
+	isprime[n*n::n] = False
+    if isprime[n+4]:
+	isprime[(n+4)*(n+4)::n+4] = False
+    n += 6
+primes = [i for i in xrange(1,N+1) if isprime[i]]
+
+from itertools import count
+factors = {}
+for p in primes:
+    factors[p] = 0
+    for k in count(1):
+        n = p**k
+        if n > N:
+            break
+        factors[p] += int(N/p**k)
+
+# remove factors of 10 (we don't need the zeros at the end)
+tens = min(factors[2], factors[5])
+factors[2] -= tens
+factors[5] -= tens
+
+fact = 1
+factors_2 = factors[2]
+del factors[2]
+for p in factors:
+    fact *= p**factors[p]
+fact >>= factors_2
+
+def sumdigits(n):
+    digitsum = 0
+    while n>0:
+        n,r = divmod(n,10)
+        digitsum += r
+    return digitsum
+
+print sumdigits(fact)
+[/code]

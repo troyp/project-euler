@@ -1,0 +1,40 @@
+Python solution...
+
+[code=python]
+from itertools import count, takewhile
+from utils import factorize_rec, product
+def sigma_fn(n):
+    fzn = factorize_rec(n)
+    return product((sum((p**j for j in xrange(i+1))) for p,i in fzn.items()))
+def aliquot_sum(n):
+    return sigma_fn(n) - n
+
+abundants = set([12])
+pairsums = set([24])
+total = 78
+for n in xrange(13,28124):
+    if aliquot_sum(n) > n:
+	abundants.add(n)
+	for a in abundants:
+	    pairsums.add(n+a)
+    if n not in pairsums:
+	total += n
+print total
+[/code]
+
+Here's another version that's a little slower, but easier to read
+
+[code=python]
+from itertools import count, takewhile
+from utils import factorize_rec, product
+def sigma_fn(n):
+    fzn = factorize_rec(n)
+    return product((sum((p**j for j in xrange(i+1))) for p,i in fzn.items()))
+def aliquot_sum(n):
+    return sigma_fn(n) - n
+
+abundantsinrange = set([n for n in xrange(12, 28112) if aliquot_sum(n) > n])
+abundant_pairsums = set([n+m for n in abundantsinrange 
+                         for m in abundantsinrange if n<=m])
+print sum((n for n in xrange(1,28124) if n not in abundant_pairsums))
+[/code]

@@ -1,0 +1,90 @@
+Naive solution in Python.
+[code=python]
+def d(n):
+        if n <= 1:
+                return 0
+        d = 0
+        for i in xrange(1, int(n/2 + 1)):
+                if n%i == 0:
+                        d += i
+        return d
+
+N = 10000
+total = 0
+for n in xrange(1,N):
+        dn = d(n)
+        if d(dn) == n and dn != n:
+                total += n
+print total
+[/code]
+
+I haven't tried to optimize this solution. We don't actually need to test all the factors: we can calculate d from the prime factorization of a number (the sum of divisors, ie. d(n)+n, is a multiplicative function, so we get d(n) = product(1+p+...+p^i) - n  (where p are the prime factors and i the powers of the p).
+
+PS. There is no ambiguity in the question, btw: it's quite clear about what an amicable number is and asks for those under 10000. It doesn't specify how large the other member of the pair may be. (Although it turns out to be moot anyway).
+
+edit: Here is a (moderately) optimized version...
+[code=python]
+from utils import factorize_rec, product
+def aliquot_sum(n):
+        fzn = factorize_rec(n)
+	return product((sum((p**j for j in xrange(i+1))) for p,i in fzn.items())) - n
+
+N = 10000
+total = 0
+for n in xrange(1,N):
+        dn = aliquot_sum(n)
+        if aliquot_sum(dn) == n and dn != n:
+                total += n
+print total
+[/code]
+I've had to factor some code out into a utility library. Here are the relevant parts...
+[code=python]
+def product(iterable):
+	prod = 1
+	for i in iterable:
+		prod *= i
+	return prod
+
+# memoization decorator
+def memoize(f):
+	cache = {}
+	def memoized(*x, **k):
+		if x in cache:
+			return cache[x]
+		else:
+			result = f(*x, **k)
+			cache[x] = result
+			return result
+	return memoized
+
+from itertools import count
+def prime_iter():
+    yield 2
+    candidates = count(3,2)
+    for candidate in candidates:
+        if candidate%2 == 0: continue
+        n = 3
+        while n*n <= candidate:
+            if candidate%n == 0:
+                break
+            n += 2
+        else:
+            yield candidate
+
+def add_counts(dict1, dict2):
+	result = dict1
+	for key in dict2:
+		result[key] = dict2[key] + dict1.get(key,0)
+	return result
+
+@memoize
+def factorize_rec(n):
+	if n==1:
+		return {}
+	"Recursive factorization function, suitable for memoization"
+        for p in prime_iter():
+		if p*p > n:
+			return {n:1}
+		if n%p == 0:
+			return add_counts({p:1}, factorize_rec(n/p))
+[/code]

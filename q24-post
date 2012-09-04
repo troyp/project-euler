@@ -1,0 +1,24 @@
+You can do this by hand, of course, but I wrote a general solution in Python.
+[code=python]
+from math import factorial
+
+def fromdigits(ds):
+	return sum((d*10**n for n,d in enumerate(reversed(ds))))
+
+def nth_perm(n, digits):
+    "returns the nth permutation of digits, starting at 0th perm"
+    # ordering determined by the order of the digits list
+    # for lexicographic ordering, the list should be sorted
+    k = len(digits)
+    if k==1: return digits
+    q,r = divmod(n,factorial(k-1))
+    d = digits[q]
+    del digits[q]
+    return [d] + nth_perm(r, digits)
+    
+print fromdigits(nth_perm(999999, range(10)))
+[/code]
+
+This algorithm is closely analogous to that for base conversion. The main difference (apart from dividing by factorials rather than powers of 10) is that you need to keep a list of "digits remaining" to index the ith lowest digit available.
+
+This is not surprising, of course. After all, if we were generating the nth lexicographic permutation of k digits *with replacement*, a base conversion is exactly what that would amount to.

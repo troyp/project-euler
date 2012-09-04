@@ -1,0 +1,37 @@
+I used a simple long division algorithm for this (yay primary school :-)). If a division gives a zero remainder, the expansion terminates. If a remainder recurs, the two occurrences delimit a repeating block. One of these is guaranteed to happen within n-1 steps, since that's as many distinct remainders as there are.
+
+I coded this in Python using a generator to churn out (digit,remainder) pairs from the long division algorithm, then another function to step through the generator keeping track of both digits and remainders - when a remainder recurs, it splits the list into a "leading digits" and "repeating digits" part.
+
+This could probably be optimized quite a bit, but it seems fast enough as it is.
+[code=python]
+# generator for long division expansion of 1/n (digits,remainders)
+def reciprocal_digits_remainders(n):
+    d = 1
+    while True:
+	q,r = divmod(d,n)
+	yield (q,r)
+	d = r * 10
+
+def reciprocal_digits(n):
+    """returns the digits of 1/n in 2 lists:
+    the 1st with leading digits, the 2nd with repeating digits"""
+    digits = []
+    remainders = []
+    for q,r in reciprocal_digits_remainders(n):
+	remainders.append(r)
+	digits.append(q)
+	if r == 0:
+	    return digits[1:], [0]
+	if r in remainders[:-1]:
+	    repeater = remainders.index(r)
+	    return digits[1:repeater+1], digits[repeater+1:]
+
+record = 0
+record_n = 0
+for n in xrange(1,1000):
+    repeat_len = len(reciprocal_digits(n)[1])
+    if repeat_len > record:
+	record = repeat_len
+	record_n = n
+print record_n, record
+[/code]

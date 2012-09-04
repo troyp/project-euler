@@ -1,0 +1,38 @@
+Solution in Python.
+[code=]
+from itertools import cycle
+
+ndays_in_month = [31,28,31,30,31,30,31,31,30,31,30,31]
+ndays_in_month_leap = [31,29,31,30,31,30,31,31,30,31,30,31]
+
+def day_after_n(startday, n):
+    "returns the day of week after n days"
+    return (startday + n) % 7
+
+def days_in_century(startyear):
+    total = 36500
+    for poss_leap_yr in xrange(startyear+(-startyear%4), startyear+100, 4):
+        if not poss_leap_yr%100==0 or poss_leap_yr%400==0:
+            total += 1    # leap year
+    return total
+
+total = 0
+date = 0
+day = day_after_n(1, 365) # Jan 1st 1901 (Jan 1st, 1900 = Mon)
+for month in monthly_iter(1901):
+    if date >= days_in_century(1901):
+        break
+    if day == 0:
+        total += 1
+    date += month
+    day = day_after_n(day, month)
+print total
+[/code]
+
+@bartmeijer
+
+[quote]I just computed 1200/7 = 171 :)[/quote]
+
+This method is not valid. For instance, it would give the same answer for the number of Mondays which fell on the 1st of the month, but the correct answer is 172. It's just luck you got the correct answer.
+
+The question is actually very poorly chosen: I'd have thought they'd have chosen a day for which this method didn't yield a correct answer.

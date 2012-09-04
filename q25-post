@@ -1,0 +1,12 @@
+Python
+[code=python]
+from itertools import dropwhile
+
+def Fibo():
+    a = 1; b = 0
+    while True:
+	yield b
+	a, b = a+b, a
+
+print dropwhile(lambda (i,n): n<10**999, enumerate(Fibo())).next()[0]
+[/code]
